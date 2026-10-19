@@ -1,11 +1,11 @@
 import os
 import requests
 
-# Modelli OpenRouter a pagamento (ultra-precisi e performanti)
+# Modelli OpenRouter a pagamento con Ricerca Web attiva (:online)
 PAID_MODELS = [
-    "openai/gpt-4o-mini",
-    "anthropic/claude-3.5-haiku",
-    "google/gemini-2.0-flash-001"
+    "openai/gpt-4o-mini:online",
+    "google/gemini-2.0-flash-001",
+    "anthropic/claude-3.5-haiku"
 ]
 
 PROMPT_SYSTEM = (
@@ -19,11 +19,13 @@ PROMPT_SYSTEM = (
     "3. OBBLIGO ASSOLUTO DELLA TRADUZIONE DEL NUOVO MONDO DA JW.ORG: Quando citi o riporti un qualsiasi versetto o passo biblico, "
     "devi trascriverlo attingendo esclusivamente e unicamente alla Traduzione del Nuovo Mondo così come viene pubblicata e consultabile "
     "sui siti ufficiali jw.org e wol.jw.org. È severamente vietato usare qualsiasi altra versione della Bibbia (come la CEI, la Diodati o la Riveduta). "
-    "Ogni versetto citato deve corrispondere in modo identico alle scelte lessicali e al testo ufficiale della Traduzione del Nuovo Mondo presente su jw.org."
+    "Sfrutta la ricerca web per verificare sul sito ufficiale jw.org il testo esatto della Traduzione del Nuovo Mondo in italiano. "
+    "Se non possiedi la trascrizione letterale identica della TNM per quel determinato versetto, NON usare virgolette per citazioni dirette, "
+    "ma spiega il significato del versetto parafrasandolo fedelmente secondo la terminologia ufficiale dei Testimoni di Geova."
 )
 
 def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
-    """Invia la richiesta a OpenRouter ciclando sui modelli a pagamento con temperatura azzerata."""
+    """Invia la richiesta a OpenRouter ciclando sui modelli configurati con ricerca web attiva."""
     if not api_key:
         return "⚠️ Errore: Chiave API OpenRouter non trovata nei Secrets!"
 
@@ -37,7 +39,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
     for model in PAID_MODELS:
         data = {
             "model": model,
-            "temperature": 0.0,  # Impostata a 0.0 per massima aderenza al prompt e alle Scritture
+            "temperature": 0.0,  # Massima precisione ed aderenza al testo
             "messages": [
                 {"role": "system", "content": PROMPT_SYSTEM},
                 {"role": "user", "content": user_text}
@@ -49,7 +51,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 json=data,
-                timeout=25
+                timeout=30  # Timeout leggermente più alto per consentire la ricerca web
             )
             res_data = response.json()
 
