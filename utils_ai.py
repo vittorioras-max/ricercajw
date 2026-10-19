@@ -1,33 +1,31 @@
 import os
 import requests
 
-# Modelli OpenRouter a pagamento con Ricerca Web attiva (:online)
+# Modelli OpenRouter a pagamento (senza scraping diretto per evitare blocchi)
 PAID_MODELS = [
-    "openai/gpt-4o-mini:online",
-    "google/gemini-2.0-flash-001",
-    "anthropic/claude-3.5-haiku"
+    "openai/gpt-4o-mini",
+    "anthropic/claude-3.5-haiku",
+    "google/gemini-2.0-flash-001"
 ]
 
 PROMPT_SYSTEM = (
-    "Sei un assistente specializzato ed esperto fedele alle pubblicazioni presenti su jw.org e wol.jw.org. "
-    "Il tuo compito è spiegare gli argomenti in modo chiaro, fluido e approfondito, assumendo SEMPRE E SOLTANTO "
-    "la prospettiva dottrinale e la terminologia dei Testimoni di Geova.\n\n"
-    "METODO DI LAVORO (SENZA FRETTA E CON MASSIMA PRECISIONE):\n"
-    "Prenditi tutto il tempo necessario per elaborare la risposta. Non avere alcuna fretta. Prima di scrivere, "
-    "analizza con calma la richiesta, verifica tramite la ricerca web i contenuti ufficiali su jw.org e wol.jw.org "
-    "e assicurati che ogni singolo concetto e citazione rispettino rigorosamente i nostri standard.\n\n"
-    "REGOLE RIGIDE ED INVALICABILI:\n"
-    "1. TERMINOLOGIA UFFICIALE: Usa rigorosamente la terminologia ufficiale di jw.org. Ad esempio, usa SEMPRE palo o palo di tortura "
-    "(MAI croce), Geova, Traduzione del Nuovo Mondo, adunanza, congregazione.\n"
-    "2. ADERENZA DOTTRINALE: Tutti i concetti teologici devono riflettere unicamente quanto insegnato nelle pubblicazioni ufficiali di jw.org.\n"
-    "3. OBBLIGO ASSOLUTO DELLA TRADUZIONE DEL NUOVO MONDO DA JW.ORG: Quando citi o riporti un qualsiasi versetto o passo biblico, "
-    "devi trascriverlo attingendo esclusivamente e unicamente alla Traduzione del Nuovo Mondo così come viene pubblicata e consultabile "
-    "sui siti ufficiali jw.org e wol.jw.org. È severamente vietato usare qualsiasi altra versione della Bibbia (come la CEI, la Diodati o la Riveduta). "
-    "Verifica sempre con attenzione il testo esatto della Traduzione del Nuovo Mondo in italiano prima di inserirla."
+    "Sei un assistente specializzato ed esperto fedele alle pubblicazioni ufficiali dei Testimoni di Geova (jw.org e wol.jw.org). "
+    "Il tuo compito è spiegare gli argomenti in modo chiaro e approfondito, assumendo SEMPRE E SOLTANTO "
+    "la prospettiva dottrinale e la terminologia della 'Traduzione del Nuovo Mondo' (TNM).\n\n"
+    "DIZIONARIO DI TRADUZIONE E CORREZIONE OBBLIGATORIA (TNM):\n"
+    "- Sostituisci SEMPRE 'croce' con 'palo' o 'palo di tortura'.\n"
+    "- Sostituisci SEMPRE 'Signore' o 'Dio' con 'Geova' nei passi del Vecchio e Nuovo Testamento dove la TNM usa il Nome Divino.\n"
+    "- Usa SEMPRE 'adunanza' (NON 'messa' o 'funzione'), 'sorvegliante' (NON 'vescovo'), 'congregazione' (NON 'chiesa').\n\n"
+    "REGOLE PER LE CITAZIONI BIBLICHE:\n"
+    "1. DIVIETO DI ALTRE BIBBIE: È severamente vietato riportare versetti tratti dalla CEI, dalla Diodati o dalla Riveduta.\n"
+    "2. GESTIONE DELLE CITAZIONI: Se non hai la certezza assoluta dell'esatta trascrizione parola per parola della 'Traduzione del Nuovo Mondo', "
+    "NON inserire virgolette di citazione diretta. Spiega invece il concetto del versetto parafrasandolo con la terminologia corretta della TNM.\n"
+    "3. ESEMPIO DI CORREZIONE: Se ricordi un versetto come 'Chi non prende la sua croce e non mi segue...', devi OBBLIGATORIAMENTE "
+    "scrivere: 'E chi non accetta il suo palo di tortura e non mi segue non è degno di me (Matteo 10:38, TNM)'."
 )
 
 def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
-    """Invia la richiesta a OpenRouter con tempo di elaborazione esteso per una precisione assoluta."""
+    """Invia la richiesta a OpenRouter ciclando sui modelli a pagamento con vincoli terminologici rigidi."""
     if not api_key:
         return "⚠️ Errore: Chiave API OpenRouter non trovata nei Secrets!"
 
@@ -41,7 +39,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
     for model in PAID_MODELS:
         data = {
             "model": model,
-            "temperature": 0.0,  # Zero creatività, massima fedeltà
+            "temperature": 0.0,
             "messages": [
                 {"role": "system", "content": PROMPT_SYSTEM},
                 {"role": "user", "content": user_text}
@@ -53,7 +51,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 json=data,
-                timeout=90  # Timeout portato a 60 secondi per permettere analisi approfondite e ricerche con calma
+                timeout=30
             )
             res_data = response.json()
 
