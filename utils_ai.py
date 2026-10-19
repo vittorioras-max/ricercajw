@@ -38,7 +38,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
     for model in FREE_MODELS:
         data = {
             "model": model,
-            "temperature": 0.1,
+            "temperature": 0.3,
             "messages": [
                 {"role": "system", "content": PROMPT_SYSTEM},
                 {"role": "user", "content": user_text}
