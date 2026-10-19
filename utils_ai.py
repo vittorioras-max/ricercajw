@@ -37,7 +37,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
     for model in PAID_MODELS:
         data = {
             "model": model,
-            "temperature": 0.2,  # Impostata a 0.0 per massima aderenza al prompt e alle Scritture
+            "temperature": 0.0,  # Impostata a 0.0 per massima aderenza al prompt e alle Scritture
             "messages": [
                 {"role": "system", "content": PROMPT_SYSTEM},
                 {"role": "user", "content": user_text}
