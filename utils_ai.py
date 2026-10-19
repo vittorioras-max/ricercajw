@@ -53,7 +53,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 json=data,
-                timeout=60  # Timeout portato a 60 secondi per permettere analisi approfondite e ricerche con calma
+                timeout=90  # Timeout portato a 60 secondi per permettere analisi approfondite e ricerche con calma
             )
             res_data = response.json()
 
