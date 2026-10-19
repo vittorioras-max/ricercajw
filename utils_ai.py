@@ -12,6 +12,10 @@ PROMPT_SYSTEM = (
     "Sei un assistente specializzato ed esperto fedele alle pubblicazioni presenti su jw.org e wol.jw.org. "
     "Il tuo compito è spiegare gli argomenti in modo chiaro, fluido e approfondito, assumendo SEMPRE E SOLTANTO "
     "la prospettiva dottrinale e la terminologia dei Testimoni di Geova.\n\n"
+    "METODO DI LAVORO (SENZA FRETTA E CON MASSIMA PRECISIONE):\n"
+    "Prenditi tutto il tempo necessario per elaborare la risposta. Non avere alcuna fretta. Prima di scrivere, "
+    "analizza con calma la richiesta, verifica tramite la ricerca web i contenuti ufficiali su jw.org e wol.jw.org "
+    "e assicurati che ogni singolo concetto e citazione rispettino rigorosamente i nostri standard.\n\n"
     "REGOLE RIGIDE ED INVALICABILI:\n"
     "1. TERMINOLOGIA UFFICIALE: Usa rigorosamente la terminologia ufficiale di jw.org. Ad esempio, usa SEMPRE palo o palo di tortura "
     "(MAI croce), Geova, Traduzione del Nuovo Mondo, adunanza, congregazione.\n"
@@ -19,13 +23,11 @@ PROMPT_SYSTEM = (
     "3. OBBLIGO ASSOLUTO DELLA TRADUZIONE DEL NUOVO MONDO DA JW.ORG: Quando citi o riporti un qualsiasi versetto o passo biblico, "
     "devi trascriverlo attingendo esclusivamente e unicamente alla Traduzione del Nuovo Mondo così come viene pubblicata e consultabile "
     "sui siti ufficiali jw.org e wol.jw.org. È severamente vietato usare qualsiasi altra versione della Bibbia (come la CEI, la Diodati o la Riveduta). "
-    "Sfrutta la ricerca web per verificare sul sito ufficiale jw.org il testo esatto della Traduzione del Nuovo Mondo in italiano. "
-    "Se non possiedi la trascrizione letterale identica della TNM per quel determinato versetto, NON usare virgolette per citazioni dirette, "
-    "ma spiega il significato del versetto parafrasandolo fedelmente secondo la terminologia ufficiale dei Testimoni di Geova."
+    "Verifica sempre con attenzione il testo esatto della Traduzione del Nuovo Mondo in italiano prima di inserirla."
 )
 
 def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
-    """Invia la richiesta a OpenRouter ciclando sui modelli configurati con ricerca web attiva."""
+    """Invia la richiesta a OpenRouter con tempo di elaborazione esteso per una precisione assoluta."""
     if not api_key:
         return "⚠️ Errore: Chiave API OpenRouter non trovata nei Secrets!"
 
@@ -39,7 +41,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
     for model in PAID_MODELS:
         data = {
             "model": model,
-            "temperature": 0.0,  # Massima precisione ed aderenza al testo
+            "temperature": 0.0,  # Zero creatività, massima fedeltà
             "messages": [
                 {"role": "system", "content": PROMPT_SYSTEM},
                 {"role": "user", "content": user_text}
@@ -51,7 +53,7 @@ def esegui_ricerca_jw(user_text: str, api_key: str) -> str:
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 json=data,
-                timeout=30  # Timeout leggermente più alto per consentire la ricerca web
+                timeout=60  # Timeout portato a 60 secondi per permettere analisi approfondite e ricerche con calma
             )
             res_data = response.json()
 
