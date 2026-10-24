@@ -45,17 +45,15 @@ if voce_scelta:
     st.markdown(f"**Domanda:** {voce_scelta['domanda']}")
     st.markdown("---")
     
+    # Pulsanti sovrapposti per lo storico
+    if st.button("🔊 Leggi", key="storico_leggi", use_container_width=True):
+        st.info("💡 Per ascoltare il testo, usa la funzione di lettura dello schermo o selezionalo.")
+    if st.button("📝 Copia", key="storico_copia", use_container_width=True):
+        st.success("Testo pronto qui sotto:")
+        st.code(voce_scelta["risposta"], language="markdown")
+        
+    st.markdown("---")
     st.markdown(voce_scelta["risposta"])
-    
-    # Pulsanti nativi sotto la risposta dello storico
-    col_a, col_b, _ = st.columns([1, 1, 4])
-    with col_a:
-        if st.button("🔊 Leggi", key="storico_audio", use_container_width=True):
-            st.info("💡 Usa la funzione di lettura dello schermo del tuo telefono o browser.")
-    with col_b:
-        if st.button("📝 Copia", key="storico_copia", use_container_width=True):
-            st.write(f"Testo pronto da copiare: `{voce_scelta['risposta']}`")
-            
     st.markdown("---")
 
 OPENROUTER_KEY = st.secrets.get("OPENROUTER_API_KEY", "")
@@ -84,15 +82,15 @@ if btn_avvia:
             salva(user_query, risposta)
             
         st.markdown("### 📋 Risultato")
-        st.markdown(risposta)
         
-        # Pulsanti nativi sotto la nuova risposta
-        col_c, col_d, _ = st.columns([1, 1, 4])
-        with col_c:
-            if st.button("🔊 Leggi", key="nuovo_audio", use_container_width=True):
-                st.info("💡 Usa la funzione di lettura dello schermo del tuo telefono o browser.")
-        with col_d:
-            if st.button("📝 Copia", key="nuovo_copia", use_container_width=True):
-                st.write(f"Testo pronto da copiare: `{risposta}`")
+        # Pulsanti sovrapposti per la nuova ricerca
+        if st.button("🔊 Leggi", key="nuovo_leggi", use_container_width=True):
+            st.info("💡 Per ascoltare il testo, usa la funzione di lettura dello schermo o selezionalo.")
+        if st.button("📝 Copia", key="nuovo_copia", use_container_width=True):
+            st.success("Testo pronto qui sotto:")
+            st.code(risposta, language="markdown")
+            
+        st.markdown("---")
+        st.markdown(risposta)
     else:
         st.warning("Per favore, inserisci un testo prima di avviare la ricerca.")
