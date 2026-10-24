@@ -5,7 +5,7 @@ from utils_ai import esegui_ricerca_jw
 from storico import salva
 
 st.set_page_config(
-    page_title="ricercavic",
+    page_title="ricercavicjw",
     page_icon="📖",
     layout="centered"
 )
