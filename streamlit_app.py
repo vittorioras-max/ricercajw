@@ -9,39 +9,42 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- 1. FUNZIONI PER AUDIO E COPIA ---
+# --- 1. FUNZIONE PER I PULSANTI AFFIANCATI (AUDIO E COPIA) ---
 def pulsanti_azioni(testo, id_unico):
-    """Mostra i pulsanti emoji 🔊 e 📝 sopra la risposta"""
-    col1, col2, _ = st.columns([1, 1, 8])
+    """Mostra i pulsanti emoji 🔊 e 📝 affiancati sulla stessa riga"""
     
-    # Pulisce il testo da virgolette per non rompere il codice JavaScript
-    testo_pulito = testo.replace("`", "").replace('"', '\\"').replace("\n", " ")
+    # Pulisci il testo per evitare errori nei comandi JavaScript
+    testo_pulito = testo.replace("`", "").replace('"', '\\"').replace("\n", " ").replace("'", "\\'")
     
-    with col1:
-        # Pulsante Lettura Vocale (HTML/JS nativo del browser)
-        html_audio = f"""
+    # HTML unito con Flexbox per mantenere le icone vicine sulla stessa riga
+    html_pulsanti = f"""
+        <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 10px;">
+            <!-- Pulsante Audio -->
             <button onclick="
                 window.speechSynthesis.cancel();
                 let msg = new SpeechSynthesisUtterance('{testo_pulito}');
                 msg.lang = 'it-IT';
+                window.currentUtterance = msg;
                 window.speechSynthesis.speak(msg);
-            " style="font-size:20px; background:none; border:none; cursor:pointer;" title="Leggi">
+            " style="font-size:26px; background:none; border:none; cursor:pointer; padding:0;" title="Leggi">
                 🔊
             </button>
-        """
-        components.html(html_audio, height=45)
-
-    with col2:
-        # Pulsante Copia negli appunti
-        html_copia = f"""
+            
+            <!-- Pulsante Copia -->
             <button onclick="
-                navigator.clipboard.writeText(`{testo_pulito}`);
+                const el = document.createElement('textarea');
+                el.value = `{testo}`;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
                 alert('Testo copiato negli appunti!');
-            " style="font-size:20px; background:none; border:none; cursor:pointer;" title="Copia">
+            " style="font-size:26px; background:none; border:none; cursor:pointer; padding:0;" title="Copia">
                 📝
             </button>
-        """
-        components.html(html_copia, height=45)
+        </div>
+    """
+    components.html(html_pulsanti, height=45)
 
 # --- 2. GESTIONE AUTENTICAZIONE ---
 if "authenticated" not in st.session_state:
@@ -80,7 +83,7 @@ if voce_scelta:
     st.markdown(f"**Domanda:** {voce_scelta['domanda']}")
     st.markdown("---")
     
-    # Aggiunge i pulsanti 🔊 e 📝 sopra la risposta dello storico
+    # Mostra i pulsanti affiancati sopra la risposta dello storico
     pulsanti_azioni(voce_scelta["risposta"], "storico")
     
     st.markdown(voce_scelta["risposta"])
@@ -113,7 +116,7 @@ if btn_avvia:
             
         st.markdown("### 📋 Risultato")
         
-        # Aggiunge i pulsanti 🔊 e 📝 sopra il nuovo risultato
+        # Mostra i pulsanti affiancati sopra la nuova risposta
         pulsanti_azioni(risposta, "nuovo")
         
         st.markdown(risposta)
