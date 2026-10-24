@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 from utils_ai import esegui_ricerca_jw
 from storico import salva, barra_storico
 
@@ -9,44 +8,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- 1. FUNZIONE PER I PULSANTI AFFIANCATI (AUDIO E COPIA) ---
-def pulsanti_azioni(testo, id_unico):
-    """Mostra i pulsanti emoji 🔊 e 📝 affiancati sulla stessa riga"""
-    
-    # Pulisci il testo per evitare errori nei comandi JavaScript
-    testo_pulito = testo.replace("`", "").replace('"', '\\"').replace("\n", " ").replace("'", "\\'")
-    
-    # HTML unito con Flexbox per mantenere le icone vicine sulla stessa riga
-    html_pulsanti = f"""
-        <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 10px;">
-            <!-- Pulsante Audio -->
-            <button onclick="
-                window.speechSynthesis.cancel();
-                let msg = new SpeechSynthesisUtterance('{testo_pulito}');
-                msg.lang = 'it-IT';
-                window.currentUtterance = msg;
-                window.speechSynthesis.speak(msg);
-            " style="font-size:26px; background:none; border:none; cursor:pointer; padding:0;" title="Leggi">
-                🔊
-            </button>
-            
-            <!-- Pulsante Copia -->
-            <button onclick="
-                const el = document.createElement('textarea');
-                el.value = `{testo}`;
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand('copy');
-                document.body.removeChild(el);
-                alert('Testo copiato negli appunti!');
-            " style="font-size:26px; background:none; border:none; cursor:pointer; padding:0;" title="Copia">
-                📝
-            </button>
-        </div>
-    """
-    components.html(html_pulsanti, height=45)
-
-# --- 2. GESTIONE AUTENTICAZIONE ---
+# --- 1. GESTIONE AUTENTICAZIONE ---
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
@@ -63,7 +25,7 @@ if not st.session_state.authenticated:
             st.error("Password errata. Riprova.")
     st.stop()
 
-# --- 3. BARRA LATERALE (LOGOUT E STORICO) ---
+# --- 2. BARRA LATERALE (LOGOUT E STORICO) ---
 with st.sidebar:
     st.write("⚙️ **Account**")
     if st.button("🔒 Esci (Logout)", use_container_width=True):
@@ -73,7 +35,7 @@ with st.sidebar:
 
 voce_scelta = barra_storico()
 
-# --- 4. INTERFACCIA PRINCIPALE ---
+# --- 3. INTERFACCIA PRINCIPALE ---
 st.title("📖 ricercavicjw")
 st.caption("Assistente di ricerca e analisi basato sui contenuti ufficiali Watch Tower")
 
@@ -83,10 +45,17 @@ if voce_scelta:
     st.markdown(f"**Domanda:** {voce_scelta['domanda']}")
     st.markdown("---")
     
-    # Mostra i pulsanti affiancati sopra la risposta dello storico
-    pulsanti_azioni(voce_scelta["risposta"], "storico")
-    
     st.markdown(voce_scelta["risposta"])
+    
+    # Pulsanti nativi sotto la risposta dello storico
+    col_a, col_b, _ = st.columns([1, 1, 4])
+    with col_a:
+        if st.button("🔊 Leggi", key="storico_audio", use_container_width=True):
+            st.info("💡 Usa la funzione di lettura dello schermo del tuo telefono o browser.")
+    with col_b:
+        if st.button("📝 Copia", key="storico_copia", use_container_width=True):
+            st.write(f"Testo pronto da copiare: `{voce_scelta['risposta']}`")
+            
     st.markdown("---")
 
 OPENROUTER_KEY = st.secrets.get("OPENROUTER_API_KEY", "")
@@ -115,11 +84,15 @@ if btn_avvia:
             salva(user_query, risposta)
             
         st.markdown("### 📋 Risultato")
-        
-        # Mostra i pulsanti affiancati sopra la nuova risposta
-        pulsanti_azioni(risposta, "nuovo")
-        
         st.markdown(risposta)
+        
+        # Pulsanti nativi sotto la nuova risposta
+        col_c, col_d, _ = st.columns([1, 1, 4])
+        with col_c:
+            if st.button("🔊 Leggi", key="nuovo_audio", use_container_width=True):
+                st.info("💡 Usa la funzione di lettura dello schermo del tuo telefono o browser.")
+        with col_d:
+            if st.button("📝 Copia", key="nuovo_copia", use_container_width=True):
+                st.write(f"Testo pronto da copiare: `{risposta}`")
     else:
         st.warning("Per favore, inserisci un testo prima di avviare la ricerca.")
-        
