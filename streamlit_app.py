@@ -43,15 +43,15 @@ if voce_scelta:
 
 OPENROUTER_KEY = st.secrets.get("OPENROUTER_API_KEY", "")
 
-# Inizializza la variabile per il testo se non esiste
+# Inizializza la variabile di stato per il testo della ricerca
 if "testo_ricerca" not in st.session_state:
     st.session_state.testo_ricerca = ""
 
-# Funzione per pulire la casella di testo
+# Funzione per pulire il testo
 def pulisci_testo():
     st.session_state.testo_ricerca = ""
 
-# Area per inserire la domanda
+# Area per inserire la domanda collegata allo state
 user_query = st.text_area(
     "Inserisci l'argomento, il passo biblico o il testo da analizzare:",
     height=150,
@@ -59,7 +59,7 @@ user_query = st.text_area(
     key="testo_ricerca"
 )
 
-# --- UNICA RIGA CON DUE PULSANTI: 2/3 Avvia Ricerca (sx) | 1/3 Clear (dx) ---
+# --- PULSANTI AFFIANCATI: 2/3 Avvia Ricerca (sx) | 1/3 Clear (dx) ---
 col_avvia, col_clear = st.columns([2, 1])
 
 with col_avvia:
@@ -68,7 +68,7 @@ with col_avvia:
 with col_clear:
     btn_clear = st.button("🗑️ Clear", type="secondary", use_container_width=True, on_click=pulisci_testo)
 
-# Esecuzione della ricerca quando si preme "Avvia Ricerca"
+# Esecuzione della ricerca
 if btn_avvia:
     if user_query.strip():
         with st.spinner("Ricerca ed elaborazione in corso sui modelli..."):
