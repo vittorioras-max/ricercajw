@@ -25,13 +25,20 @@ if not st.session_state.authenticated:
             st.error("Password errata. Riprova.")
     st.stop()
 
-# --- 2. BARRA LATERALE (LOGOUT E STORICO) ---
+# --- 2. BARRA LATERALE (LOGOUT, STORICO E PROTEZIONE CANCELLAZIONE) ---
 with st.sidebar:
     st.write("⚙️ **Account**")
     if st.button("🔒 Esci (Logout)", use_container_width=True):
         st.session_state.authenticated = False
         st.rerun()
     st.markdown("---")
+    
+    # Sezione di gestione protetta dello storico
+    st.write("🗑️ **Gestione Storico**")
+    conferma_pwd_canc = st.text_input("Password per eliminare:", type="password", key="pwd_canc")
+    
+    # Passiamo la password alla funzione dello storico o gestiamo la cancellazione protetta
+    # (Nota: la funzione barra_storico gestisce la visualizzazione delle voci)
 
 voce_scelta = barra_storico()
 
@@ -90,3 +97,4 @@ if btn_avvia:
         st.markdown(risposta)
     else:
         st.warning("Per favore, inserisci un testo prima di avviare la ricerca.")
+        
