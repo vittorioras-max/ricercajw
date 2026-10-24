@@ -45,8 +45,13 @@ if voce_scelta:
     st.markdown(f"**Domanda:** {voce_scelta['domanda']}")
     st.markdown("---")
     
-    # Riquadro di testo formattato con pulsante di COPIA nativo di Streamlit
-    st.code(voce_scelta["risposta"], language=None)
+    # Pulsante Copia per lo storico
+    if st.button("📝 Copia", key="storico_copia", use_container_width=True):
+        st.success("Testo pronto qui sotto:")
+        st.code(voce_scelta["risposta"], language="markdown")
+        
+    st.markdown("---")
+    st.markdown(voce_scelta["risposta"])
     st.markdown("---")
 
 OPENROUTER_KEY = st.secrets.get("OPENROUTER_API_KEY", "")
@@ -76,7 +81,12 @@ if btn_avvia:
             
         st.markdown("### 📋 Risultato")
         
-        # Riquadro con pulsante COPIA nativo ed essenziale
-        st.code(risposta, language=None)
+        # Pulsante Copia per la nuova ricerca
+        if st.button("📝 Copia", key="nuovo_copia", use_container_width=True):
+            st.success("Testo pronto qui sotto:")
+            st.code(risposta, language="markdown")
+            
+        st.markdown("---")
+        st.markdown(risposta)
     else:
         st.warning("Per favore, inserisci un testo prima di avviare la ricerca.")
