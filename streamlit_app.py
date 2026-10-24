@@ -27,7 +27,7 @@ if not st.session_state.authenticated:
             st.error("Password errata. Riprova.")
     st.stop()
 
-# --- 2. FUNZIONI DI GESTIONE STORICO (SICURE) ---
+# --- 2. FUNZIONI PER LO STORICO (LETTURA E SCRITTURA) ---
 def carica_storico():
     if os.path.exists("storico.json"):
         try:
@@ -37,18 +37,58 @@ def carica_storico():
             return []
     return []
 
-# --- 3. BARRA LATERALE (ACCOUNT, BACKUP, CANCELLAZIONE PROTETTA E STORICO) ---
+def salva_storico_completo(dati):
+    with open("storico.json", "w", encoding="utf-8") as f:
+        json.dump(dati, f, ensure_ascii=False, indent=4)
+
+storico_corrente = carica_storico()
+APP_PWD = st.secrets.get("APP_PASSWORD", "1234")
+
+# --- 3. BARRA LATERALE (ORDINE PERSONALIZZATO) ---
+voce_scelta = None
+
 with st.sidebar:
-    st.write("⚙️ **Account**")
-    if st.button("🔒 Esci (Logout)", use_container_width=True):
-        st.session_state.authenticated = False
-        st.rerun()
+    # -------------------------------------------------------------
+    # 1. IN ALTO: ELENCO DELLE RICERCHE (CON CANCELLAZIONE SINGOLA)
+    # -------------------------------------------------------------
+    st.write("📜 **Le tue ricerche**")
     
-    st.markdown("---")
-    st.write("💾 **Backup dello Storico**")
-    storico_corrente = carica_storico()
+    # Campo password per le operazioni di cancellazione
+    pwd_operazioni = st.text_input("Password per eliminare:", type="password", key="pwd_operazioni")
+    
     if storico_corrente:
-        # Pulsante di backup generale per scaricare il file JSON dello storico
+        for idx, item in enumerate(storico_corrente):
+            col_btn, col_del = st.columns([5, 1])
+            
+            # Bottone per selezionare la ricerca
+            with col_btn:
+                etichetta = f"{item.get('data', '')} · {item.get('domanda', '')[:18]}..."
+                if st.button(etichetta, key=f"storico_btn_{idx}", use_container_width=True):
+                    voce_scelta = item
+                    st.session_state["voce_selezionata"] = item
+
+            # Cestino per cancellare la singola ricerca
+            with col_del:
+                if st.button("❌", key=f"del_single_{idx}", help="Elimina questa ricerca"):
+                    if pwd_operazioni == APP_PWD:
+                        storico_corrente.pop(idx)
+                        salva_storico_completo(storico_corrente)
+                        if "voce_selezionata" in st.session_state and st.session_state["voce_selezionata"] == item:
+                            del st.session_state["voce_selezionata"]
+                        st.success("Ricerca eliminata!")
+                        st.rerun()
+                    else:
+                        st.error("Password errata!")
+    else:
+        st.caption("Nessuna ricerca salvata.")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------
+    # 2. BACKUP
+    # -------------------------------------------------------------
+    st.write("💾 **Backup dello Storico**")
+    if storico_corrente:
         st.download_button(
             label="📥 Scarica Backup",
             data=json.dumps(storico_corrente, ensure_ascii=False, indent=4),
@@ -60,34 +100,30 @@ with st.sidebar:
         st.caption("Nessun dato da esportare.")
 
     st.markdown("---")
-    st.write("🗑️ **Zona Pericolosa**")
-    pwd_elimina = st.text_input("Password per svuotare:", type="password", key="input_pwd_elimina")
-    
-    if st.button("🗑️ Svuota Storico", use_container_width=True):
-        APP_PWD = st.secrets.get("APP_PASSWORD", "1234")
-        if pwd_elimina == APP_PWD:
-            # Svuota il file azzerandone il contenuto
-            with open("storico.json", "w", encoding="utf-8") as f:
-                json.dump([], f)
-            st.success("Storico svuotato con successo!")
-            st.rerun()
-        else:
-            st.error("Password errata o vuota!")
+
+    # -------------------------------------------------------------
+    # 3. ESCI APP (LOGOUT)
+    # -------------------------------------------------------------
+    st.write("⚙️ **Account**")
+    if st.button("🔒 Esci (Logout)", use_container_width=True):
+        st.session_state.authenticated = False
+        st.rerun()
 
     st.markdown("---")
-    st.write("📜 **Le tue ricerche**")
 
-# Gestione della selezione dello storico
-voce_scelta = None
-with st.sidebar:
-    if storico_corrente:
-        for idx, item in enumerate(storico_corrente):
-            etichetta = f"{item.get('data', '')} · {item.get('domanda', '')[:22]}..."
-            if st.button(etichetta, key=f"storico_btn_{idx}", use_container_width=True):
-                voce_scelta = item
-                st.session_state["voce_selezionata"] = item
-    else:
-        st.caption("Nessuna ricerca salvata.")
+    # -------------------------------------------------------------
+    # 4. CANCELLA INTERO STORICO
+    # -------------------------------------------------------------
+    st.write("⚠️ **Zona Pericolosa**")
+    if st.button("🗑️ Cancella TUTTO lo storico", use_container_width=True):
+        if pwd_operazioni == APP_PWD:
+            salva_storico_completo([])
+            if "voce_selezionata" in st.session_state:
+                del st.session_state["voce_selezionata"]
+            st.success("Tutto lo storico è stato cancellato!")
+            st.rerun()
+        else:
+            st.error("Inserisci la password corretta in alto per confermare!")
 
 # Mantiene la selezione attiva in memoria
 if "voce_selezionata" in st.session_state and not voce_scelta:
