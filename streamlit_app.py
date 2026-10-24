@@ -21,7 +21,7 @@ if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    st.title("🔒 Accesso a ricercavicjw")
+    st.title("🔒 Accesso a ricercavic")
     pwd = st.text_input("Inserisci la password di accesso:", type="password")
     
     if st.button("Accedi", type="primary"):
