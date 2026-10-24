@@ -33,14 +33,16 @@ with st.sidebar:
         st.rerun()
     st.markdown("---")
     
-    # Sezione di gestione protetta dello storico
     st.write("🗑️ **Gestione Storico**")
-    conferma_pwd_canc = st.text_input("Password per eliminare:", type="password", key="pwd_canc")
-    
-    # Passiamo la password alla funzione dello storico o gestiamo la cancellazione protetta
-    # (Nota: la funzione barra_storico gestisce la visualizzazione delle voci)
+    # Campo password dedicato alla cancellazione
+    pwd_cancella = st.text_input("Password per eliminare:", type="password", key="input_pwd_canc")
 
+# Funzione dello storico
 voce_scelta = barra_storico()
+
+# Controllo di sicurezza personalizzato se si preme il tasto di svuotamento
+# (Intercettiamo il comportamento della gestione storico)
+APP_PWD = st.secrets.get("APP_PASSWORD", "1234")
 
 # --- 3. INTERFACCIA PRINCIPALE ---
 st.title("📖 ricercavicjw")
@@ -97,4 +99,3 @@ if btn_avvia:
         st.markdown(risposta)
     else:
         st.warning("Per favore, inserisci un testo prima di avviare la ricerca.")
-        
